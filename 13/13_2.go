@@ -8,7 +8,7 @@ import (
 func filterOldEmails(emails []email) {
 	isOldChan := make(chan bool)
 
-	sendIsOld(isOldChan, emails)
+	go sendIsOld(isOldChan, emails)
 
 	isOld := <-isOldChan
 	fmt.Println("email 1 is old:", isOld)

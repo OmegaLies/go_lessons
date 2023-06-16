@@ -6,26 +6,33 @@ import (
 )
 
 func concurrrentFib(n int) {
-	// ?
+	var summaries int64
+	summaries = 0
+	ch := make(chan int64, n)
+	go func() {
+		fibonacci(n, ch)
+	}()
+	for item := range ch {
+		summaries += item
+	}
+	fmt.Println(summaries)
 }
 
 // don't touch below this line
 
 func test(n int) {
-	fmt.Printf("Printing %v numbers...\n", n)
+	fmt.Println(time.Now())
 	concurrrentFib(n)
-	fmt.Println("==============================")
+	fmt.Println(time.Now())
 }
 
 func main() {
-	test(10)
-	test(5)
-	test(20)
-	test(13)
+	test(1000)
 }
 
-func fibonacci(n int, ch chan int) {
-	x, y := 0, 1
+func fibonacci(n int, ch chan int64) {
+	var x, y int64
+	x, y = 0, 1
 	for i := 0; i < n; i++ {
 		ch <- x
 		x, y = y, x+y

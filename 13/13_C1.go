@@ -2,19 +2,25 @@ package main
 
 import (
 	"fmt"
+	"sync"
 	"time"
 )
 
 func pingPong(numPings int) {
 	pings := make(chan struct{})
 	pongs := make(chan struct{})
-	go ponger(pings, pongs)
-	go pinger(pings, pongs, numPings)
+	count := 2
+	var wg sync.WaitGroup
+	wg.Add(count)
+	go ponger(&wg, pings, pongs)
+	go pinger(&wg, pings, pongs, numPings)
+	wg.Wait()
 }
 
 // don't touch below this line
 
-func pinger(pings, pongs chan struct{}, numPings int) {
+func pinger(wg *sync.WaitGroup, pings, pongs chan struct{}, numPings int) {
+	defer wg.Done()
 	go func() {
 		sleepTime := 50 * time.Millisecond
 		for i := 0; i < numPings; i++ {
@@ -33,7 +39,8 @@ func pinger(pings, pongs chan struct{}, numPings int) {
 	fmt.Println("pongs done")
 }
 
-func ponger(pings, pongs chan struct{}) {
+func ponger(wg *sync.WaitGroup, pings, pongs chan struct{}) {
+	defer wg.Done()
 	i := 0
 	for range pings {
 		fmt.Println("ping", i, "got", "pong", i, "sent")
